@@ -1,1 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic German Quiz - 50 Questions (Per-Question Submission)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .question-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* 12px */
+            padding: 1.5rem; /* 24px */
+            margin-bottom: 1.5rem; /* 24px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .question-title {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            margin-bottom: 0.75rem; /* 12px */
+            color: #1f2937; /* gray-800 */
+        }
+        .option-label {
+            display: block;
+            margin-bottom: 0.5rem; /* 8px */
+            padding: 0.75rem; /* 12px */
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.5rem; /* 8px */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .option-label:hover:not(.disabled-option) { /* Only hover if not disabled */
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #9ca3af; /* gray-400 */
+        }
+        .option-label input[type="radio"] {
+            margin-right: 0.5rem; /* 8px */
+        }
+        .fill-in-blank {
+            border: 1px solid #9ca3af; /* gray-400 */
+            padding: 0.25rem 0.5rem;
+            min-width: 100px;
+            display: inline-block;
+            background-color: #f9fafb; /* gray-50 */
+            border-radius: 0.25rem;
+        }
+        .score-area {
+            margin-top: 1rem; /* Reduced margin as it's always visible */
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: #e0f2fe; /* light blue */
+            border: 1px solid #7dd3fc; /* sky-300 */
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .correct-answer {
+            background-color: #d1fae5 !important; /* Tailwind green-100 */
+            border-color: #6ee7b7 !important; /* Tailwind green-300 */
+        }
+        .incorrect-answer {
+            background-color: #fee2e2 !important; /* Tailwind red-100 */
+            border-color: #fca5a5 !important; /* Tailwind red-300 */
+        }
+        .actual-correct-answer { 
+            background-color: #cffafe !important; 
+            border: 2px solid #22d3ee !important; 
+            font-weight: bold;
+        }
+        .feedback-text {
+            margin-left: 10px;
+            font-weight: bold;
+            color: #059669; /* Tailwind green-700 */
+        }
+        .single-submit-button {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            font-weight: 500;
+            padding: 0.5rem 1rem; /* 8px 16px */
+            border-radius: 0.375rem; /* 6px */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: 0.75rem; /* 12px */
+            font-size: 0.875rem; /* 14px */
+        }
+        .single-submit-button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+        .single-submit-button:disabled {
+            background-color: #9ca3af; /* gray-400 */
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .disabled-option { /* Class to disable hover effects on options after submission */
+            cursor: default;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 sm:p-8">
+    <div class="container mx-auto max-w-2xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-700">Basic German Quiz - 50 Questions</h1>
+            <p class="text-gray-600 mt-2">Submit each answer individually to see your progress!</p>
+        </header>
+
+        <div id="scoreAreaGerman" class="score-area">
+            Your score will appear here as you go.
+        </div>
+
+        <form id="quizFormGerman">
+            </form>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Viel Glück! (Good luck!)</p>
+        </footer>
+    </div>
+
+    <script>
+        const germanQuizData = [
+            // ... (Previous 50 questions remain here) ...
+            // Numbers (Zahlen) - 5
+            { question: "What is \"five\" in German?", options: { a: "Vier", b: "Fünf", c: "Sechs", d: "Sieben" }, answer: "b", type: "mcq" },
+            { question: "The number \"ten\" in German is ______.", answer: "zehn", type: "fill" },
+            { question: "\"Dreizehn\" is which number in English?", options: { a: "Three", b: "Thirty", c: "Thirteen", d: "Twelve" }, answer: "c", type: "mcq" },
+            { question: "What is \"twenty\" in German?", answer: "zwanzig", type: "fill" },
+            { question: "The number \"one hundred\" in German is ______.", options: { a: "Einhundert", b: "Tausend", c: "Zwanzig", d: "Elf" }, answer: "a", type: "mcq" },
+            
+            // Greetings (Begrüßungen) - 5
+            { question: "How do you say \"Hello\" informally in German?", options: { a: "Guten Tag", b: "Auf Wiedersehen", c: "Hallo", d: "Danke" }, answer: "c", type: "mcq" },
+            { question: "\"Good day\" in German is \"Guten ______.\"", answer: "Tag", type: "fill" },
+            { question: "What does \"Tschüss\" mean?", options: { a: "Please", b: "Thank you", c: "Goodbye (informal)", d: "Yes" }, answer: "c", type: "mcq" },
+            { question: "How do you say \"Good morning\" in German?", answer: "Guten Morgen", type: "fill" },
+            { question: "\"Auf Wiedersehen\" means:", options: { a: "Hello", b: "Good night", c: "Goodbye (formal)", d: "Excuse me" }, answer: "c", type: "mcq" },
+
+            // Introductions (Vorstellungen) - 4
+            { question: "If someone asks \"Wie heißen Sie?\", what are they asking?", options: { a: "How are you?", b: "Where are you from?", c: "What is your name? (formal)", d: "Do you speak German?" }, answer: "c", type: "mcq" },
+            { question: "To say \"My name is Maria,\" you would say \"Ich ______ Maria.\"", answer: "heiße/bin", type: "fill" }, 
+            { question: "\"Wie geht es Ihnen?\" is a formal way to ask:", options: { a: "What is your name?", b: "How are you?", c: "Where do you live?", d: "What time is it?" }, answer: "b", type: "mcq" },
+            { question: "A response to \"Danke\" (Thank you) can be \"______ schön.\"", answer: "Bitte", type: "fill" },
+            
+            // Days, Months, Seasons (Wochentage, Monate, Jahreszeiten) - 6
+            { question: "Which of these is a day of the week in German?", options: { a: "Januar", b: "Montag", c: "Sommer", d: "Rot" }, answer: "b", type: "mcq" },
+            { question: "The German word for \"Monday\" is ______.", answer: "Montag", type: "fill" },
+            { question: "\"Mai\" is which month in English?", options: { a: "March", b: "May", c: "June", d: "July" }, answer: "b", type: "mcq" },
+            { question: "The German word for \"December\" is ______.", answer: "Dezember", type: "fill" },
+            { question: "Which season is \"der Frühling\"?", options: { a: "Summer", b: "Autumn/Fall", c: "Winter", d: "Spring" }, answer: "d", type: "mcq" },
+            { question: "\"Der Herbst\" is the German word for which season?", answer: "Autumn/Fall", type: "fill" },
+
+            // Colors (Farben) - 4
+            { question: "What color is \"blau\" in German?", options: { a: "Red", b: "Green", c: "Blue", d: "Yellow" }, answer: "c", type: "mcq" },
+            { question: "The German word for \"red\" is ______.", answer: "rot", type: "fill" },
+            { question: "What color is \"grün\"?", options: { a: "Green", b: "Grey", c: "Gold", d: "Black" }, answer: "a", type: "mcq" },
+            { question: "The color \"yellow\" in German is ______.", answer: "gelb", type: "fill" },
+
+            // Basic Verbs (Grundlegende Verben) - 6
+            { question: "How do you say \"I am\" in German?", options: { a: "Ich habe", b: "Du bist", c: "Ich bin", d: "Er ist" }, answer: "c", type: "mcq" },
+            { question: "\"Du ______ einen Hund.\" (You have a dog.) (verb: haben)", answer: "hast", type: "fill" },
+            { question: "The verb \"to go\" in German is:", options: { a: "kommen", b: "sehen", c: "gehen", d: "sprechen" }, answer: "c", type: "mcq" },
+            { question: "\"Er ______ (to speak) Deutsch.\" (He speaks German.)", answer: "spricht", type: "fill" },
+            { question: "\"Wir ______ (to learn) Englisch.\" (We learn English.)", options: { a: "lerne", b: "lernst", c: "lernt", d: "lernen" }, answer: "d", type: "mcq" },
+            { question: "The verb \"to see\" in German is ______.", answer: "sehen", type: "fill" },
+            
+            // Common Nouns (Allgemeine Nomen) - 7
+            { question: "What is \"das Buch\" in English?", options: { a: "The house", b: "The book", c: "The car", d: "The table" }, answer: "b", type: "mcq" },
+            { question: "The German word for \"water\" is \"das ______.\"", answer: "Wasser", type: "fill" },
+            { question: "\"Der Hund\" means:", options: { a: "The cat", b: "The bird", c: "The dog", d: "The fish" }, answer: "c", type: "mcq" },
+            { question: "What is \"die Katze\" in English?", answer: "The cat", type: "fill" },
+            { question: "\"Das Brot\" is a German word for:", options: { a: "Milk", b: "Bread", c: "Butter", d: "Cheese" }, answer: "b", type: "mcq" },
+            { question: "The German for \"the apple\" is \"der ______.\"", answer: "Apfel", type: "fill" },
+            { question: "\"Der Tisch\" means:", options: { a: "The chair", b: "The door", c: "The window", d: "The table" }, answer: "d", type: "mcq" },
+
+            // Basic Adjectives (Einfache Adjektive) - 5
+            { question: "What does \"groß\" mean?", options: { a: "Small", b: "Big/Large", c: "Short", d: "Tall" }, answer: "b", type: "mcq" }, 
+            { question: "The opposite of \"kalt\" (cold) is ______.", answer: "warm/heiß", type: "fill" }, 
+            { question: "\"Gut\" means:", options: { a: "Bad", b: "Good", c: "Okay", d: "Nice" }, answer: "b", type: "mcq" },
+            { question: "The adjective \"klein\" means ______.", answer: "small/little", type: "fill" },
+            { question: "If something is \"neu\", it is:", options: { a: "Old", b: "New", c: "Blue", d: "True" }, answer: "b", type: "mcq" },
+
+            // Simple Prepositions (Einfache Präpositionen) - 4
+            { question: "\"In\" in German is often:", options: { a: "Auf", b: "Unter", c: "In", d: "Neben" }, answer: "c", type: "mcq" },
+            { question: "The cat is ______ dem Tisch. (under the table)", answer: "unter", type: "fill" },
+            { question: "\"Auf\" can mean:", options: { a: "Under", b: "Behind", c: "On/Upon", d: "In front of" }, answer: "c", type: "mcq" },
+            { question: "The book is ______ the table. (on the table)", answer: "auf", type: "fill" },
+            
+            // Question Words (Fragewörter) - 4
+            { question: "\"Wer\" is a question word meaning:", options: { a: "What", b: "Where", c: "Who", d: "When" }, answer: "c", type: "mcq" },
+            { question: "\"______ ist das?\" (What is that?)", answer: "Was", type: "fill" },
+            { question: "\"Wo\" means:", options: { a: "Why", b: "Where", c: "How", d: "Which" }, answer: "b", type: "mcq" },
+            { question: "\"______ geht es dir?\" (How are you? - informal)", answer: "Wie", type: "fill" }
+        ];
+
+        const quizFormGerman = document.getElementById('quizFormGerman');
+        const scoreArea = document.getElementById('scoreAreaGerman');
+        let currentScore = 0;
+        let questionsAttempted = 0;
+
+        function updateScoreDisplay() {
+            scoreArea.textContent = `Current Score: ${currentScore} / ${questionsAttempted} attempted (out of ${germanQuizData.length} total)`;
+        }
+
+        function buildQuiz() {
+            quizFormGerman.innerHTML = ''; 
+            germanQuizData.forEach((q, index) => {
+                const questionNumber = index + 1;
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.id = `question-card-${index}`;
+
+                let questionHTML = `<p class="question-title">${questionNumber}. ${q.question}</p>`;
+
+                if (q.type === "mcq") {
+                    questionHTML += `<div class="options-container space-y-2">`;
+                    for (const key in q.options) {
+                        questionHTML += `
+                            <label class="option-label" id="option-label-${index}-${key}">
+                                <input type="radio" name="germanQuestion${index}" value="${key}">
+                                ${key.toUpperCase()}. ${q.options[key]}
+                            </label>
+                        `;
+                    }
+                    questionHTML += `</div>`;
+                } else if (q.type === "fill") {
+                    questionHTML += `
+                        <div class="mt-2">
+                            Answer: <input type="text" name="germanQuestion${index}" id="fill-input-${index}" class="fill-in-blank border border-gray-300 rounded px-2 py-1 w-full sm:w-auto">
+                            <span id="feedback-fill-${index}" class="feedback-text"></span>
+                        </div>
+                    `;
+                }
+                questionHTML += `<button type="button" id="submit-q-${index}" class="single-submit-button" onclick="checkSingleAnswer(${index})">Submit Answer for Q${questionNumber}</button>`;
+                questionCard.innerHTML = questionHTML;
+                quizFormGerman.appendChild(questionCard);
+            });
+            updateScoreDisplay(); // Initial score display
+        }
+        
+        function checkSingleAnswer(index) {
+            const q = germanQuizData[index];
+            const correctAnswerString = q.answer.toLowerCase();
+            const correctAnswersArray = correctAnswerString.split('/').map(ans => ans.trim());
+            let userAnswer = "";
+            
+            const submitButton = document.getElementById(`submit-q-${index}`);
+
+            // Reset previous visual feedback for this question's options/input
+            if (q.type === "mcq") {
+                for (const key in q.options) {
+                    const label = document.getElementById(`option-label-${index}-${key}`);
+                    if (label) {
+                         label.classList.remove('correct-answer', 'incorrect-answer', 'actual-correct-answer', 'disabled-option');
+                    }
+                }
+            } else if (q.type === "fill") {
+                const inputField = document.getElementById(`fill-input-${index}`);
+                const feedbackSpan = document.getElementById(`feedback-fill-${index}`);
+                if (inputField) {
+                    inputField.classList.remove('correct-answer', 'incorrect-answer');
+                }
+                if (feedbackSpan) {
+                    feedbackSpan.textContent = ''; 
+                }
+            }
+
+            if (q.type === "mcq") {
+                const userAnswerElement = document.querySelector(`input[name="germanQuestion${index}"]:checked`);
+                const optionLabels = document.querySelectorAll(`#question-card-${index} .option-label`);
+
+                if (userAnswerElement) {
+                    userAnswer = userAnswerElement.value.trim().toLowerCase();
+                    const selectedLabel = document.getElementById(`option-label-${index}-${userAnswer}`);
+                    
+                    if (correctAnswersArray.includes(userAnswer)) {
+                        currentScore++;
+                        if (selectedLabel) selectedLabel.classList.add('correct-answer');
+                    } else {
+                        if (selectedLabel) selectedLabel.classList.add('incorrect-answer');
+                        const actualCorrectLabel = document.getElementById(`option-label-${index}-${correctAnswersArray[0]}`);
+                        if (actualCorrectLabel) actualCorrectLabel.classList.add('actual-correct-answer');
+                    }
+                } else {
+                    // No answer selected, just show the correct one
+                    const actualCorrectLabel = document.getElementById(`option-label-${index}-${correctAnswersArray[0]}`);
+                    if (actualCorrectLabel) actualCorrectLabel.classList.add('actual-correct-answer');
+                }
+                // Disable all radio buttons and style labels for this MCQ
+                document.getElementsByName(`germanQuestion${index}`).forEach(radio => radio.disabled = true);
+                optionLabels.forEach(label => label.classList.add('disabled-option'));
+
+            } else if (q.type === "fill") {
+                const userAnswerElement = document.getElementById(`fill-input-${index}`);
+                const feedbackSpan = document.getElementById(`feedback-fill-${index}`);
+                if (userAnswerElement) {
+                    userAnswer = userAnswerElement.value.trim().toLowerCase();
+                    if (userAnswer && correctAnswersArray.includes(userAnswer)) {
+                        currentScore++;
+                        userAnswerElement.classList.add('correct-answer');
+                    } else {
+                        userAnswerElement.classList.add('incorrect-answer');
+                        if (feedbackSpan) {
+                            feedbackSpan.textContent = `(Correct: ${q.answer})`;
+                        }
+                    }
+                    userAnswerElement.disabled = true; // Disable input after submission
+                } else {
+                     if (feedbackSpan) { // Should not happen if element exists
+                        feedbackSpan.textContent = `(Correct: ${q.answer})`;
+                    }
+                }
+            }
+            questionsAttempted++;
+            updateScoreDisplay();
+            if (submitButton) submitButton.disabled = true;
+        }
+        
+        buildQuiz(); // Initialize the quiz display
+
+    </script>
+</body>
+</html>
 
